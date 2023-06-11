@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Websocket</title>
+</head>
+<body>
+
+<label for="name">Name: </label>
+<input type="text" id="name" name="name" onchange="websocket(this)">
+
+<label for="message">Message: </label>
+<input type="text" id="message" name="message">
+<button onclick="send(this)">Send</button>
+
+<button onclick="close()">Close</button>
+
+<script>
+    let socket;
+
+    function websocket (elem) {
+        // Create WebSocket connection.
+        console.log(elem.value);
+
+        socket = new WebSocket(`ws://localhost:8080/start-websocket/${elem.value}`);
+
+        socket.onopen = function(e) {
+            alert("[open] Connection established");
+            alert("Sending to server");
+            socket.send("My name is John");
+        };
+    }
+
+    function send(elem){
+        socket.onopen(e => {
+            socket.send(elem.value);
+            alert(`[send]: ${elem.value}`);
+        })
+    }
+
+    socket.onmessage = function(event) {
+        alert(`[message] Data received from server: ${event.data}`);
+    };
+
+    function close () {
+        socket.close();
+    }
+
+    socket.onerror = function(error) {
+        alert(`[error]: ${error.value}`);
+    };
+
+</script>
+
+</body>
+</html>
