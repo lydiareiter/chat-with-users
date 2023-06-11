@@ -1,0 +1,1 @@
+insert into test_user (id, password, username) VALUES (1, 'test123', 'lydia');

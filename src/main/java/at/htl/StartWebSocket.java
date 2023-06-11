@@ -1,6 +1,9 @@
 package at.htl;
 
+import at.htl.control.UserRepo;
+import at.htl.enity.User;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.websocket.EncodeException;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
@@ -13,13 +16,29 @@ import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 
-@ServerEndpoint("/start-websocket/{name}")
+@ServerEndpoint("/start-websocket/{username}/{password}")
 @ApplicationScoped
 public class StartWebSocket {
 
+    @Inject
+    UserRepo userRepo;
+
+    boolean login = false;
+
     @OnOpen
-    public void onOpen(Session session, @PathParam("name") String name) {
-        System.out.println("onOpen> " + name);
+    public void onOpen(Session session, @PathParam("username") String username, @PathParam("password") String password) {
+        userRepo.findAll().stream().filter(user -> user.getUsername() == username).forEach(user -> {
+            if (user.getPassword() == password) {
+                System.out.println("onOpen> " + username);
+                login = true;
+                return;
+            }
+            System.out.println("[error]: Falsches Password");
+            login = false;
+        });
+        userRepo.persist(new User(username, password));
+        System.out.println("neuer User angelegt");
+        login = true;
     }
 
     @OnClose
@@ -34,6 +53,8 @@ public class StartWebSocket {
 
     @OnMessage
     public void onMessage(String message, @PathParam("name") String name) {
-        System.out.println("onMessage> " + name + ": " + message);
+        if (login){
+            System.out.println("onMessage> " + name + ": " + message);
+        }
     }
 }

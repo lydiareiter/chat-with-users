@@ -6,49 +6,49 @@
 </head>
 <body>
 
-<label for="name">Name: </label>
-<input type="text" id="name" name="name" onchange="websocket(this)">
+<form id="form">
+    <label for="fname">Name:</label>
+    <input type="text" id="fname" name="fname"><br><br>
+    <label for="fpassword">Password:</label>
+    <input type="password" id="fpassword" name="fpassword"><br><br>
+    <input type="submit" value="Submit" onsubmit="websocket()">
+</form>
 
-<label for="message">Message: </label>
-<input type="text" id="message" name="message">
-<button onclick="send(this)">Send</button>
-
-<button onclick="close()">Close</button>
+<form id="form-message">
+    <label for="message">Message:</label>
+    <input type="text" id="message" name="message"><br><br>
+    <input type="submit" value="Submit" onsubmit="send()">
+</form>
 
 <script>
     let socket;
 
-    function websocket (elem) {
+    function websocket () {
+        let form = document.getElementById("form")
         // Create WebSocket connection.
-        console.log(elem.value);
 
-        socket = new WebSocket(`ws://localhost:8080/start-websocket/${elem.value}`);
+        let name = form[0].value;
+        console.log(`[name]: ${name}`)
+
+        let password = form[1].value;
+        console.log(`[password]: ${password}`)
+
+        socket = new WebSocket(`ws://localhost:8080/start-websocket/${name}/${password}`);
 
         socket.onopen = function(e) {
-            alert("[open] Connection established");
-            alert("Sending to server");
-            socket.send("My name is John");
+            console.log("[open] Connection established");
+            console.log("Sending to server");
+            socket.close();
         };
     }
 
     function send(elem){
         socket.onopen(e => {
             socket.send(elem.value);
-            alert(`[send]: ${elem.value}`);
+            console.log(`[send]: ${elem.value}`);
+            socket.close();
         })
     }
-
-    socket.onmessage = function(event) {
-        alert(`[message] Data received from server: ${event.data}`);
-    };
-
-    function close () {
-        socket.close();
-    }
-
-    socket.onerror = function(error) {
-        alert(`[error]: ${error.value}`);
-    };
 
 </script>
 
